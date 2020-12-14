@@ -16,5 +16,5 @@ $SAIL_PATH artisan queue:restart
 echo "Running migrations and seeders"
 $SAIL_PATH artisan migrate:fresh --seed
 
-echo "Application started on  http://localhost:6600"
+echo "Application started on  http://localhost:8080"
 
