@@ -23,5 +23,15 @@ Route::get('/', function () {
 });
 
 Route::group(['prefix' => 'providers'], function () {
+    // list providers and their restrictions
     Route::get('/list', 'App\Http\Controllers\Providers\ProviderController@getProviders');
+
+    // upload image for valid providers and validate them as send response
+    Route::post('/createImage', 'App\Http\Controllers\Providers\ImageUploadController@uploadImages')->name('image.upload');
+
+    // upload videos for valid providers and validate them as send response
+    Route::post('/createVideos', 'App\Http\Controllers\Providers\VideoUploadController@uploadVideos')->name('video.upload');
+
+    // list uploaded objects
+    Route::get('/getBuckets', 'App\Http\Controllers\Providers\ProviderController@getObjects');
 });
