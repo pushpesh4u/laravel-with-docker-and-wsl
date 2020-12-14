@@ -35,7 +35,7 @@ class ProviderValidationSeeder extends Seeder
             ],[
                 'provider_id' => 1,
                 'image_type' => '.mp3',
-                'restriction_params' => 'size',
+                'restriction_params' => 'length',
                 'restriction_values' => '< 30 seconds',
                 'notes' => ''
             ],[

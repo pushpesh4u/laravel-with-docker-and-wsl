@@ -13,6 +13,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/** 
+ * Laravel 8 routing changed a bit
+ * See @link https://laravel.com/docs/8.x/upgrade#routing
+ */
+
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::group(['prefix' => 'providers'], function () {
+    Route::get('/list', 'App\Http\Controllers\Providers\ProviderController@getProviders');
 });
