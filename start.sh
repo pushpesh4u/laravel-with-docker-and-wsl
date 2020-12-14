@@ -1,5 +1,4 @@
 #!/bin/sh
-ls -lah | wc -l
 
 BASEDIR=$(dirname "$0")
 
