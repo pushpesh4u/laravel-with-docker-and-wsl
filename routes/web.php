@@ -29,6 +29,9 @@ Route::group(['prefix' => 'providers'], function () {
     // upload image for valid providers and validate them as send response
     Route::post('/createImage', 'App\Http\Controllers\Providers\ImageUploadController@uploadImages')->name('image.upload');
 
+    // upload image for valid providers and validate them as send response
+    Route::post('/createVideo', 'App\Http\Controllers\Providers\VideoUploadController@uploadVideos')->name('video.upload');
+
     // list uploaded objects
     Route::get('/getObjects', 'App\Http\Controllers\Providers\ProviderController@getObjects');
 });

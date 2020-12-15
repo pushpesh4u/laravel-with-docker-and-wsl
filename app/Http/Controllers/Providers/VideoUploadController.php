@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\ProvidersValidation;
 use App\Models\ProvidersObject;
 
-class ImageUploadController extends Controller
+class VideoUploadController extends Controller
 {
-    public function uploadImages(Request $request) {
+    public function uploadVideos(Request $request) {
         $response = [];
         $responseCode = 200;
 
         $validation = Validator::make($request->all(),[
             'provider' => 'required|exists:providers|int',
-            'image_file' => 'required|image|mimes:jpg,gif',
+            'video_file' => 'required|image|mimes:mp4,mov,mp3',
             'name' => 'required|string'
         ]);
 
@@ -28,7 +28,7 @@ class ImageUploadController extends Controller
             return response($errors,422);
         } else {
             // check more
-            $file = $request->file('image_file');
+            $file = $request->file('video_file');
             $extension = '.' . strtolower( $file->getClientOriginalExtension() );
             $providerID = $request->provider;
 
@@ -48,7 +48,6 @@ class ImageUploadController extends Controller
             $errors = [];
             $filter = $filter->toArray();
 
-            // $request->file('image')->move($destinationPath, $fileName);
             $file_path = $file->getPathName();
 
             if( !empty($filter) ) {
