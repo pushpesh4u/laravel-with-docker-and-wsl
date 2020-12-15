@@ -5,18 +5,20 @@ namespace App\Http\Controllers\Providers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 use App\Models\ProvidersValidation;
+use App\Models\ProvidersObject;
 
 class ImageUploadController extends Controller
 {
     public function uploadImages(Request $request) {
-        $response = ['test'];
+        $response = [];
         $responseCode = 200;
 
         $validation = Validator::make($request->all(),[
             'id' => 'required|exists:providers|int',
-            'image' => 'required|image|mimes:jpg,gif',
+            'image' => 'required',
             'name' => 'required|string'
         ]);
 
@@ -26,7 +28,8 @@ class ImageUploadController extends Controller
             return response($errors,422);
         } else {
             // check more
-            $extension = '.' . $request->image->extension();
+            $file = $request->file('image');
+            $extension = '.' . strtolower( $file->getClientOriginalExtension() );
             $providerID = $request->id;
 
             $filter = ProvidersValidation::select('image_type', 'restriction_params', 'restriction_values', 'notes')
@@ -45,7 +48,7 @@ class ImageUploadController extends Controller
             $errors = [];
             $filter = $filter->toArray();
 
-            $file = $request->file('image');
+            // $request->file('image')->move($destinationPath, $fileName);
             $file_path = $file->getPathName();
 
             if( !empty($filter) ) {
@@ -59,7 +62,7 @@ class ImageUploadController extends Controller
                             }
                             break;
                         case 'size':
-                            $checkFileSize = checkFileSize($check['restriction_values'], $file_path);
+                            $checkFileSize = checkFileSize($check['restriction_values'], $file->getSize());
                             if(!$checkFileSize) {
                                 $errors[$check['restriction_params']] = 'Please provide an image with a correct size. ' . $restrictions['restrictions'][$check['restriction_params']];
                             }
@@ -74,11 +77,41 @@ class ImageUploadController extends Controller
                             break;
                     }
                 }
+            } else {
+                // no rules were found
+                $errors['general'] = 'Request does not seem to be valid.';
             }
 
+            $save_file_path = '';
             if( !empty($errors) ) {
                 return response($errors,422);
+            } else {
+                // check if we need to extract any image from the video
+                foreach($filter as $check) {
+                    switch($check['notes']) {
+                        case 'Extract preview image from middle of the video':
+                            $save_file_path = storage_path('app/public/' . trim( $request->post('name') ) . '_screenshot.jpg');
+                            getScreenshot($file_path, $save_file_path);
+                            $save_file_path = asset('storage/' . trim( $request->post('name') ) . '_screenshot.jpg');
+                            break;
+                        default:
+                            break;
+                    }
+                }
             }
+            $imageSavePath = trim( $request->post('name') ) . $extension;
+            $obj_file_path = storage_path('app/public/');
+            $file->move($obj_file_path, $imageSavePath);
+            $obj_save_path = asset('storage/' . $imageSavePath);
+
+            $saveObj = new ProvidersObject;
+            $saveObj->provider_id = $providerID;
+            $saveObj->object_path = $obj_save_path;
+            $saveObj->screenshot_path = $save_file_path;
+
+            $saveObj->save();
+
+            $response['status'] = 'Successfully stored values';
         }
 
         return response($response, $responseCode)
