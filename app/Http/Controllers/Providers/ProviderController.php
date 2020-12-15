@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Providers;
+use App\Models\ProvidersObject;
 
 class ProviderController extends Controller
 {
@@ -40,6 +41,8 @@ class ProviderController extends Controller
     public function getObjects() {
         $response = [];
         $responseCode = 200;
+
+        $response = ProvidersObject::orderBy('updated_at','desc')->paginate(10);
 
         return response($response, $responseCode)
         ->header('Content-Type', 'application/json');

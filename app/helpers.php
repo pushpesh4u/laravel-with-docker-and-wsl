@@ -102,14 +102,13 @@ function checkAspectRatio($values, $image) {
     return $aspectCheck == 1;
 }
 
-function checkFileSize($values, $image) {
+function checkFileSize($values, $uploadedFileSize) {
     $values = explode(' ', $values);
     $identifier = array_shift($values); // get the identifier
     $values = implode(' ', $values);
 
     $expectedFileSize = getSizeInBytes($values);
-    $uploadedFileSize = filesize($image);
-
+    //echo $uploadedFileSize . '---' . $expectedFileSize;
     $result = false;
     switch($identifier) {
         case '<':
@@ -132,10 +131,52 @@ function checkFileSize($values, $image) {
     return $result;
 }
 
-function checkContentLength($values, $image) {
+function checkContentLength($values, $media) {
+    $values = explode(' ', $values);
+    $identifier = array_shift($values); // get the identifier
+    $values = implode(' ', $values);
+
     $result = false;
 
-    // @TODO
+    $getID3 = new \getID3;
+    $info = $getID3->analyze($media);
+
+    $lengthInSeconds = $info['playtime_seconds'];
+    $expectedLength = getTimeInSeconds($values);
+    //echo $lengthInSeconds . '----' . $expectedLength;
+    switch($identifier) {
+        case '<':
+            $result = ( $lengthInSeconds < $expectedLength );
+            break;
+        case '>':
+            $result = ( $lengthInSeconds > $expectedLength );
+            break;
+        case '<=':
+            $result = ( $lengthInSeconds <= $expectedLength );
+            break;
+        case '>=':
+            $result = ( $lengthInSeconds >= $expectedLength );
+            break;
+        default:
+        $result = ( $uploadedFileSize < $expectedFileSize );
+            break;
+    }
 
     return $result;
+}
+
+function getScreenshot($file_path, $savePath) {
+    $ffmpeg = \FFMpeg\FFMpeg::create([
+        'ffmpeg.binaries'  => '/usr/bin/ffmpeg',
+        'ffprobe.binaries' => '/usr/bin/ffprobe'
+    ]);
+    $video = $ffmpeg->open($file_path);
+
+    $getID3 = new \getID3;
+    $info = $getID3->analyze($file_path);
+
+    $middleOfVideo = ceil( $info['playtime_seconds'] / 2 );
+
+    $frame = $video->frame(FFMpeg\Coordinate\TimeCode::fromSeconds($middleOfVideo));
+    $frame->save($savePath);
 }

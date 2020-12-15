@@ -12,6 +12,7 @@ $SAIL_PATH artisan view:clear
 $SAIL_PATH artisan config:clear
 $SAIL_PATH artisan config:cache
 $SAIL_PATH artisan queue:restart
+$SAIL_PATH artisan storage:link
 
 echo "Running migrations and seeders"
 $SAIL_PATH artisan migrate:fresh --seed
